@@ -21,6 +21,7 @@ URL = config["url"]
 estabelecimentos_vazios = []
 errors = []
 
+
 estabelecimento = "1012248698"
 
 
@@ -105,8 +106,7 @@ def login():
 def extract_estabelecimento(estabelecimento, driver):
  
    
-    pesquisar_estabelecimentos = 
-    
+    pesquisar_estabelecimentos = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@placeholder="Pesquisar estabelecimentos"]')))    
     pesquisar_estabelecimentos.click()
     ActionChains(driver).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
     ActionChains(driver).send_keys(Keys.BACKSPACE).perform()
