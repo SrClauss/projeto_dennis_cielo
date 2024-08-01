@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import requests
-
+import undetected_chromedriver as uc
 
 
 with open("config.json", "r") as file:
@@ -102,7 +102,19 @@ def login():
     ActionChains(driver).send_keys(Keys.ENTER).perform()
     
     return driver
-
+def login_undetectable():
+    driver = uc.Chrome()
+    driver.get(URL)
+    driver.maximize_window()
+    bt_other_access = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "bt-other-access")))
+    bt_other_access.click()
+    ActionChains(driver).send_keys(Keys.TAB).perform()
+    ActionChains(driver).send_keys(LOGIN).perform()
+    ActionChains(driver).send_keys(Keys.TAB).perform()
+    ActionChains(driver).send_keys(SENHA).perform()
+    ActionChains(driver).send_keys(Keys.ENTER).perform()
+    return driver
+    
 def extract_estabelecimento(estabelecimento, driver):
  
    
@@ -170,68 +182,79 @@ if __name__ == "__main__":
 
     hora_atual = datetime.fromisoformat(requests.get("http://worldtimeapi.org/api/timezone/America/Sao_Paulo").json()['datetime'])
     expiracao = datetime.fromisoformat("2024-07-25 21:41:35.065881-03:00")
+    print(config["undetected_mode"])
+    if config["undetected_mode"] == False:
+        hora = hora_atual.hour
+        workers = 3
+        if hora >= 0 and hora < 8:
+            workers = config["workers_0h_8h"]
+        elif hora >= 8 and hora < 10:
+            workers = config["workers_8h_10h"]
+        elif hora >= 10 and hora < 12:
+            workers = config["workers_10h_12h"]
+        elif hora >= 12 and hora < 14:
+            workers = config["workers_12h_14h"]
+        elif hora >= 14 and hora < 16:
+            workers = config["workers_14h_16h"]
+        elif hora >= 16 and hora < 18:
+            workers = config["workers_16h_18h"]
+        elif hora >= 18 and hora < 20:
+            workers = config["workers_18h_20h"]
+        elif hora >= 20 and hora < 22:
+            workers = config["workers_20h_22h"]
+        else:
+            workers = config["workers_22h_0h"]
+        
     
 
-    hora = hora_atual.hour
-    workers = 3
-    if hora >= 0 and hora < 8:
-        workers = config["workers_0h_8h"]
-    elif hora >= 8 and hora < 10:
-        workers = config["workers_8h_10h"]
-    elif hora >= 10 and hora < 12:
-        workers = config["workers_10h_12h"]
-    elif hora >= 12 and hora < 14:
-        workers = config["workers_12h_14h"]
-    elif hora >= 14 and hora < 16:
-        workers = config["workers_14h_16h"]
-    elif hora >= 16 and hora < 18:
-        workers = config["workers_16h_18h"]
-    elif hora >= 18 and hora < 20:
-        workers = config["workers_18h_20h"]
-    elif hora >= 20 and hora < 22:
-        workers = config["workers_20h_22h"]
+
+        print(f"This script is running at {hora_atual} with {workers} workers and expiring at {expiracao.strftime('%d-%m-%Y %H:%M:%S')}")
+        workbook_base = openpyxl.load_workbook("Base.xlsx")
+        sheet_base = workbook_base.active
+        estabelecimentos = [cell.value for cell in sheet_base["A"] if cell.value][1:]
+        estabelecimentos_divididos = dividir_array(estabelecimentos, workers)
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(login) for i in range(workers)]
+            drivers = [future.result() for future in as_completed(futures)]
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(multi_estabelecimentos, estabelecimentos_divididos[i], drivers[i]) for i in range(workers)]
+            for future in as_completed(futures):
+                data.extend(future.result())
+                
+        for driver in drivers:
+            driver.quit()
+
     else:
-        workers = config["workers_22h_0h"]
-    
-
-    print(f"This script is running at {hora_atual} with {workers} workers and expiring at {expiracao.strftime('%d-%m-%Y %H:%M:%S')}")
-    workbook_base = openpyxl.load_workbook("Base.xlsx")
-    sheet_base = workbook_base.active
-    estabelecimentos = [cell.value for cell in sheet_base["A"] if cell.value][1:]
-    estabelecimentos_divididos = dividir_array(estabelecimentos, workers)
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(login) for i in range(workers)]
-        drivers = [future.result() for future in as_completed(futures)]
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = [executor.submit(multi_estabelecimentos, estabelecimentos_divididos[i], drivers[i]) for i in range(workers)]
-        for future in as_completed(futures):
-            data.extend(future.result())
-    for driver in drivers:
+        workbook_base = openpyxl.load_workbook("Base.xlsx")
+        sheet_base = workbook_base.active
+        estabelecimentos = [cell.value for cell in sheet_base["A"] if cell.value][1:]
+        driver = login_undetectable()
+        data = multi_estabelecimentos(estabelecimentos, driver)
         driver.quit()
-    workbook = openpyxl.Workbook()
-    sheet = workbook.active
-    sheet.append(["Estabelecimento", "CNPJ", "Valor Ontem", "Valor Hoje", "Bruto 30", "Taxa 30", "Liquido 30"])  
-    data = [d for d in data if d != None]
-    soma = 0
-    for d in data:
-        for t in d:
-            print("inserido:", soma)
-            soma += 1
-            sheet.append([t["estabelecimento"], t["cnpj"], t["valor_ontem"], t["valor_hoje"], t["bruto_30"], t["taxa_30"], t["liquido_30"]])
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.append(["Estabelecimento", "CNPJ", "Valor Ontem", "Valor Hoje", "Bruto 30", "Taxa 30", "Liquido 30"])  
+        data = [d for d in data if d != None]
+        soma = 0
+        for d in data:
+            for t in d:
+                print("inserido:", soma)
+                soma += 1
+                sheet.append([t["estabelecimento"], t["cnpj"], t["valor_ontem"], t["valor_hoje"], t["bruto_30"], t["taxa_30"], t["liquido_30"]])
 
-    
-    sheet_errors = workbook.create_sheet("Erros")
-    sheet_errors.append(["Estabelecimento"])
-    for error in errors:
-        sheet_errors.append([error])
-    sheet_vazios = workbook.create_sheet("Estabelecimentos Vazios")
-    sheet_vazios.append(["Estabelecimento"])
-    for vazio in estabelecimentos_vazios:
-        sheet_vazios.append([vazio])
-    file_name = f"Relatório {datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.xlsx"
-    workbook.save(file_name)
+        
+        sheet_errors = workbook.create_sheet("Erros")
+        sheet_errors.append(["Estabelecimento"])
+        for error in errors:
+            sheet_errors.append([error])
+        sheet_vazios = workbook.create_sheet("Estabelecimentos Vazios")
+        sheet_vazios.append(["Estabelecimento"])
+        for vazio in estabelecimentos_vazios:
+            sheet_vazios.append([vazio])
+        file_name = f"Relatório {datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.xlsx"
+        workbook.save(file_name)
 
-    print("Relatório gerado com sucesso")
+        print("Relatório gerado com sucesso")
         
     
 

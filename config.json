@@ -1,6 +1,6 @@
 {
     "login": "dquerino",
-    "senha": "Verd@o93",
+    "senha": "Mundi@l25",
     "url": "https://minhaconta2.cielo.com.br/site/login",
     "workers_0h_8h": 8,
     "workers_8h_10h": 5,
@@ -10,6 +10,7 @@
     "workers_16h_18h": 3,
     "workers_18h_20h": 4,
     "workers_20h_22h": 5,
-    "workers_22h_0h": 7
+    "workers_22h_0h": 7,
+    "undetected_mode": true
 }
 
