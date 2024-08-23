@@ -63,7 +63,7 @@ def extract_filial(i, list_item, estabelecimento, driver):
     else:
         valor_hoje = float(valor_hoje.text.replace("R$ ", "").replace(".", "").replace(",", "."))
     driver.execute_script("window.scrollTo(0, 300);")
-    calendar = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//i[@name="calendar"]//following-sibling::input')))
+    calendar = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@class="common-icon"]//following-sibling::input')))
     calendar.click()
     button_historico = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//button[text()="Histórico"]')))
     button_historico.click()
@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
     hora_atual = datetime.fromisoformat(requests.get("http://worldtimeapi.org/api/timezone/America/Sao_Paulo").json()['datetime'])
     expiracao = datetime.fromisoformat("2024-07-25 21:41:35.065881-03:00")
-    print(config["undetected_mode"])
+   
     if config["undetected_mode"] == False:
         hora = hora_atual.hour
         workers = 3
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     
 
 
-        print(f"This script is running at {hora_atual} with {workers} workers and expiring at {expiracao.strftime('%d-%m-%Y %H:%M:%S')}")
+
         workbook_base = openpyxl.load_workbook("Base.xlsx")
         sheet_base = workbook_base.active
         estabelecimentos = [cell.value for cell in sheet_base["A"] if cell.value][1:]

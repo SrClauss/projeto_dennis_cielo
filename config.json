@@ -11,6 +11,6 @@
     "workers_18h_20h": 4,
     "workers_20h_22h": 5,
     "workers_22h_0h": 7,
-    "undetected_mode": true
+    "undetected_mode": false
 }
 
