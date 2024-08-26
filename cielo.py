@@ -23,6 +23,13 @@ errors = []
 
 
 estabelecimento = "1012248698"
+def recarregue(driver):
+    try:
+        h1s = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.TAG_NAME, "h1")))
+        return h1s
+    except Exception as e:
+        driver.get("https://minhaconta2.cielo.com.br/site/vendas/resumo/cielo")
+        recarregue(driver)
 
 
 def extract_filial(i, estabelecimento, driver):
@@ -40,8 +47,10 @@ def extract_filial(i, estabelecimento, driver):
     sleep(0.5)
     driver.get("https://minhaconta2.cielo.com.br/site/vendas/resumo/cielo")
 
+    h1s = recarregue(driver)
 
-    h1s = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.TAG_NAME, "h1")))
+
+    
     valor_ontem = h1s[3]
     valor_hoje = h1s[5]
     while valor_ontem.text == "" or valor_hoje.text == "":
