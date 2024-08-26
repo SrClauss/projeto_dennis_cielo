@@ -25,7 +25,7 @@ errors = []
 estabelecimento = "1012248698"
 
 
-def extract_filial(i, list_item, estabelecimento, driver):
+def extract_filial(i, estabelecimento, driver):
     pesquisar_estabelecimentos = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@placeholder="Pesquisar estabelecimentos"]')))
     pesquisar_estabelecimentos.click()
     ActionChains(driver).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
@@ -147,7 +147,7 @@ def extract_estabelecimento(estabelecimento, driver):
 
     
     for i in range(list_item_len):
-        result.append(extract_filial(i, list_item, estabelecimento, driver))
+        result.append(extract_filial(i, estabelecimento, driver))
         trocar_estabelecimento = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//span[text()="Trocar estabelecimento"]')))
         trocar_estabelecimento.click()
 
@@ -231,38 +231,38 @@ if __name__ == "__main__":
         driver = login_undetectable()
         data = multi_estabelecimentos(estabelecimentos, driver)
         driver.quit()
-        workbook = openpyxl.Workbook()
-        sheet = workbook.active
-        sheet.append(["Estabelecimento", "CNPJ", "Valor Ontem", "Valor Hoje", "Bruto 30", "Taxa 30", "Liquido 30"])  
-        data = [d for d in data if d != None]
-        soma = 0
-        for d in data:
-            for t in d:
-                print("inserido:", soma)
-                soma += 1
-                sheet.append([t["estabelecimento"], t["cnpj"], t["valor_ontem"], t["valor_hoje"], t["bruto_30"], t["taxa_30"], t["liquido_30"]])
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.append(["Estabelecimento", "CNPJ", "Valor Ontem", "Valor Hoje", "Bruto 30", "Taxa 30", "Liquido 30"])  
+    data = [d for d in data if d != None]
+    soma = 0
+    for d in data:
+        for t in d:
+            print("inserido:", soma)
+            soma += 1
+            sheet.append([t["estabelecimento"], t["cnpj"], t["valor_ontem"], t["valor_hoje"], t["bruto_30"], t["taxa_30"], t["liquido_30"]])
 
-        
-        sheet_errors = workbook.create_sheet("Erros")
-        sheet_errors.append(["Estabelecimento"])
-        for error in errors:
-            sheet_errors.append([error])
-        sheet_vazios = workbook.create_sheet("Estabelecimentos Vazios")
-        sheet_vazios.append(["Estabelecimento"])
-        for vazio in estabelecimentos_vazios:
-            sheet_vazios.append([vazio])
-        file_name = f"Relatório {datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.xlsx"
-        workbook.save(file_name)
+    
+    sheet_errors = workbook.create_sheet("Erros")
+    sheet_errors.append(["Estabelecimento"])
+    for error in errors:
+        sheet_errors.append([error])
+    sheet_vazios = workbook.create_sheet("Estabelecimentos Vazios")
+    sheet_vazios.append(["Estabelecimento"])
+    for vazio in estabelecimentos_vazios:
+        sheet_vazios.append([vazio])
+    file_name = f"Relatório {datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.xlsx"
+    workbook.save(file_name)
 
-        print("Relatório gerado com sucesso")
-        
+    print("Relatório gerado com sucesso")
     
 
 
 
+
+    
+
+
+
+
         
-
-
-
-
-            
