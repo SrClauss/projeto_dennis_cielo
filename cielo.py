@@ -29,7 +29,7 @@ def recarregue(driver):
         return h1s
     except Exception as e:
         driver.get("https://minhaconta2.cielo.com.br/site/vendas/resumo/cielo")
-        recarregue(driver)
+        return recarregue(driver)
 
 
 def extract_filial(i, estabelecimento, driver):
