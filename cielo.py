@@ -13,6 +13,7 @@ import requests
 import undetected_chromedriver as uc
 
 
+
 with open("config.json", "r") as file:
     config = json.load(file)
 LOGIN = config["login"]
@@ -20,6 +21,7 @@ SENHA = config["senha"]
 URL = config["url"]
 estabelecimentos_vazios = []
 errors = []
+wait_input = config["wait_input"]
 
 
 estabelecimento = "1012248698"
@@ -99,6 +101,7 @@ def extract_filial(i, estabelecimento, driver):
     return result
 
 def login():
+
     driver = webdriver.Chrome()
     driver.get(URL)
     driver.maximize_window()
@@ -109,6 +112,9 @@ def login():
     ActionChains(driver).send_keys(Keys.TAB).perform()
     ActionChains(driver).send_keys(SENHA).perform()
     ActionChains(driver).send_keys(Keys.ENTER).perform()
+    if wait_input:
+        input("Pressione Entar para continuar...")
+      
     
     return driver
 def login_undetectable():

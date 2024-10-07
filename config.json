@@ -11,6 +11,7 @@
     "workers_18h_20h": 1,
     "workers_20h_22h": 1,
     "workers_22h_0h": 1,
-    "undetected_mode": false
+    "undetected_mode": false,
+    "wait_input": true
 }
 
