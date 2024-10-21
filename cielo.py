@@ -195,8 +195,8 @@ def multi_estabelecimentos(estabelecimentos, driver):
 if __name__ == "__main__":
     data = []
 
-    hora_atual = datetime.fromisoformat(requests.get("http://worldtimeapi.org/api/timezone/America/Sao_Paulo").json()['datetime'])
-    expiracao = datetime.fromisoformat("2024-07-25 21:41:35.065881-03:00")
+    hora_atual = datetime.fromisoformat(datetime.now().isoformat())
+
    
     if config["undetected_mode"] == False:
         hora = hora_atual.hour
@@ -268,6 +268,7 @@ if __name__ == "__main__":
         sheet_vazios.append([vazio])
     file_name = f"Relatório {datetime.now().strftime('%d-%m-%Y %H-%M-%S')}.xlsx"
     workbook.save(file_name)
+
 
     print("Relatório gerado com sucesso")
     
